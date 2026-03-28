@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background: gray;
+}
+
+.login{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.login-box{
+  background: blue;
+  padding:20px;
+  border-radius:10px;
+  width:250px;
+  text-align:center;
+  color:white;
+}
+
+.login-box input{
+  width:90%;
+  padding:8px;
+  margin:5px;
+}
+
+.login-box img{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  display:block;
+  margin:10px auto;
+}
+.tc{
+  color: red;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login">
+  <div class="login-box">
+    <h3>Create Account</h3>
+
+    <input id="username" placeholder="Username">
+    <input type="file" id="profilePic" accept="image/*">
+
+    <img id="preview" src="https://via.placeholder.com/80">
+
+    <button onclick="createAccount()">Continue</button>
+
+    <p style="font-size:12px;">
+      By creating an account you agree to 
+      <a href="condition .html" class="tc">terms and conditions</a>
+    </p>
+  </div>
+</div>
+
+<script>
+
+// PREVIEW IMAGE
+profilePic.onchange = () => {
+  const file = profilePic.files[0];
+  if(file){
+    preview.src = URL.createObjectURL(file);
+  }
+};
+
+// CONVERT IMAGE TO BASE64
+function toBase64(file){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+  });
+}
+
+// CREATE ACCOUNT (SAVE USER)
+async function createAccount(){
+  const name = username.value;
+  const file = profilePic.files[0];
+
+  if(!name){
+    alert("Enter username");
+    return;
+  }
+
+  let image = "https://via.placeholder.com/80";
+
+  if(file){
+    image = await toBase64(file);
+  }
+
+  // ✅ SAVE USER
+  localStorage.setItem("user", JSON.stringify({
+    username: name,
+    profilePic: image
+  }));
+
+  // ✅ GO TO HOME
+  window.location.href = "home.html";
+}
+
+</script>
+
+</body>
+</html>
