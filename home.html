@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#fafafa;
+}
+
+header{
+  background:white;
+  border-bottom:1px solid #ddd;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+}
+
+/* CARD */
+.card{
+  background:white;
+  margin:15px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+.post-header{
+  display:flex;
+  align-items:center;
+  padding:10px;
+}
+
+.post-header img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  margin-right:10px;
+}
+
+.post-image{
+  width:100%;
+}
+
+.actions{
+  padding:10px;
+}
+
+.comment-box{
+  display:flex;
+  gap:5px;
+  padding:10px;
+}
+
+.comment{
+  padding-left:15px;
+  font-size:14px;
+}
+  .button{
+    align-items:center;
+    background-colour: blue;
+</style>
+</head>
+
+<body>
+
+<header>Insta suf world</header>
+<a href="profile .html">
+  <button class="button">profile</button>
+</a>
+
+<div class="container">
+
+<!-- CREATE POST -->
+<div class="card" style="padding:10px;">
+  <input type="file" id="postImage" accept="image/*"><br><br>
+  <input id="postCaption" placeholder="Caption"><br><br>
+  <button onclick="createPost()">Post</button>
+</div>
+
+<div id="feed"></div>
+
+</div>
+
+<script>
+
+// ✅ LOAD USER FROM LOGIN
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  alert("Please login first");
+  window.location.href = "index.html";
+}
+
+// POSTS STORAGE
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+// IMAGE → BASE64
+function toBase64(file){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+  });
+}
+
+// CREATE POST
+async function createPost(){
+  let file = postImage.files[0];
+
+  if(!file){
+    alert("Select an image");
+    return;
+  }
+
+  let base64 = await toBase64(file);
+
+  let post = {
+    id: Date.now(),
+    user: user.username,
+    profilePic: user.profilePic,
+    image: base64,
+    caption: postCaption.value,
+    likes: 0,
+    comments: []
+  };
+
+  posts.unshift(post);
+  localStorage.setItem("posts", JSON.stringify(posts));
+
+  postImage.value="";
+  postCaption.value="";
+
+  render();
+}
+
+// LIKE
+function likePost(id){
+  let post = posts.find(p=>p.id==id);
+  post.likes++;
+  localStorage.setItem("posts", JSON.stringify(posts));
+  render();
+}
+
+// COMMENT
+function addComment(id, input){
+  if(!input.value) return;
+
+  let post = posts.find(p=>p.id==id);
+  post.comments.push({
+    user:user.username,
+    text:input.value
+  });
+
+  input.value="";
+  localStorage.setItem("posts", JSON.stringify(posts));
+  render();
+}
+
+// RENDER
+function render(){
+  feed.innerHTML="";
+
+  posts.forEach(post=>{
+    let card=document.createElement("div");
+    card.className="card";
+
+    card.innerHTML=`
+      <div class="post-header">
+        <img src="${post.profilePic}">
+        <b>${post.user}</b>
+      </div>
+
+      <img class="post-image" src="${post.image}">
+
+      <div class="actions">
+        ❤️ ${post.likes}
+        <button onclick="likePost(${post.id})">Like</button>
+        <p>${post.caption}</p>
+      </div>
+
+      <div id="comments-${post.id}"></div>
+
+      <div class="comment-box">
+        <input id="input-${post.id}" placeholder="Write comment...">
+        <button onclick="addComment(${post.id}, document.getElementById('input-${post.id}'))">Send</button>
+      </div>
+    `;
+
+    let commentDiv = card.querySelector(`#comments-${post.id}`);
+
+    post.comments.forEach(c=>{
+      let div=document.createElement("div");
+      div.className="comment";
+      div.innerHTML=`<b>${c.user}</b>: ${c.text}`;
+      commentDiv.appendChild(div);
+    });
+
+    feed.appendChild(card);
+  });
+}
+
+// START
+render();
+
+</script>
+
+</body>
+</html>
