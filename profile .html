@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#f5f5f5;
+  text-align:center;
+}
+
+header{
+  background:#4267B2;
+  color:white;
+  padding:15px;
+  font-size:20px;
+}
+
+.container{
+  margin-top:30px;
+}
+
+img{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+}
+
+input{
+  padding:10px;
+  margin:10px;
+  width:80%;
+  max-width:300px;
+}
+
+button{
+  padding:10px 20px;
+  margin:10px;
+  border:none;
+  background:#4267B2;
+  color:white;
+  cursor:pointer;
+  border-radius:5px;
+}
+
+/* logout button style */
+.logout{
+  background:red;
+}
+</style>
+</head>
+
+<body>
+
+<header>My Profile</header>
+
+<div class="container">
+
+  <img id="profilePic"><br>
+
+  <h3 id="username"></h3>
+
+  <input id="newName" placeholder="Change username"><br>
+  <input type="file" id="newPic" accept="image/*"><br>
+
+  <button onclick="updateProfile()">Save Changes</button>
+  <br>
+  <button onclick="goHome()">Back to Home</button>
+  <br>
+  <!-- ✅ LOGOUT BUTTON -->
+  <button class="logout" onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+
+// ✅ PROTECT PAGE
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  window.location.href = "login.html";
+}
+
+// SHOW CURRENT DATA
+profilePic.src = user.profilePic;
+username.innerText = user.username;
+
+// CONVERT IMAGE
+function toBase64(file){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+  });
+}
+
+// UPDATE PROFILE
+async function updateProfile(){
+  let name = newName.value || user.username;
+  let file = newPic.files[0];
+
+  let image = user.profilePic;
+
+  if(file){
+    image = await toBase64(file);
+  }
+
+  localStorage.setItem("user", JSON.stringify({
+    username: name,
+    profilePic: image
+  }));
+
+  alert("Profile updated!");
+  location.reload();
+}
+
+// GO HOME
+function goHome(){
+  window.location.href = "home.html";
+}
+
+// ✅ LOGOUT FUNCTION
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
